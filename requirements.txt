@@ -1,0 +1,10 @@
+io
+re
+nltk
+numpy
+xgboost
+requests
+pandas
+Flask
+sklearn
+gensim
