@@ -48,7 +48,7 @@ def my_form_post():
 	num_title = train["title"].size
 	clean_sentences = []
 	train_sentence=[None]*(num_title-1)
-	for i in range(0,num_title-1):
+	for i in range(0,num_title):
 		if(train["selftext"][i]=="nan"):
 			train_sentence[i]=str(train["title"][i])+str(train["selftext"][i])
 		else:
