@@ -47,8 +47,12 @@ def my_form_post():
 	train = pd.read_csv(io.StringIO(s.decode('utf-8')),header=0)
 	num_title = train["title"].size
 	clean_sentences = []
-	train_sentence=[]
-	train_sentence=train["title"]+train["selftext"]
+	train_sentence=[None]*(num_title-1)
+	for i in range(0,num_title-1):
+		if(train["selftext"][i]=="nan"):
+			train_sentence[i]=str(train["title"][i])+str(train["selftext"][i])
+		else:
+			train_sentence[i]=str(train["title"][i])
 	def wordbank(raw_title):
 		letters_only = re.sub("[^a-zA-Z]", " ", raw_title)
 		words = letters_only.lower().split()
@@ -71,8 +75,8 @@ def my_form_post():
 	# xgmodel=xgmodel.fit(train_data_feature, train["score"])
 
 	# Random Forest Model
-	# forest = RandomForestClassifier(n_estimators = 120)
-	# forest = forest.fit(train_data_feature, train["score"])
+	forest = RandomForestClassifier(n_estimators = 120)
+	forest = forest.fit(train_data_feature, train["score"])
 
 ###############################################################################
 
@@ -82,7 +86,7 @@ def my_form_post():
 	test_data_feature = vectorizer.transform(clean_test_sentences)
 	test_data_feature = test_data_feature.toarray()
 	# result = xgmodel.predict(test_data_feature)
-	# result = forest.predict(test_data_feature)
+	result = forest.predict(test_data_feature)
 	output=str(result[0])
 	return output
 

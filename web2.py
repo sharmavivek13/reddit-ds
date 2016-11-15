@@ -18,9 +18,10 @@ from flask import request
 from flask import render_template
 from nltk.corpus import stopwords
 from gensim.models import Word2Vec 
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.feature_extraction.text import CountVectorizer
-
+from KaggleWord2VecUtility import KaggleWord2VecUtility
+from sklearn.preprocessing import Imputer
 
 app = Flask(__name__)
 
@@ -39,7 +40,7 @@ def my_form_post():
 	name=subreddit+".csv"
 	url="https://raw.githubusercontent.com/umbrae/reddit-top-2.5-million/master/data/"+name
 	s=requests.get(url).content	
-	tokenizer = nltk.data.load('tokenizers/english.pickle')
+	
 
 ###############################################################################
 
@@ -64,20 +65,11 @@ def my_form_post():
                 counter = counter + 1
             return reviewFeatureVecs
 
-	def wordbank(raw_title):
-		letters_only = re.sub("[^a-zA-Z]", " ", raw_title)
-		words = letters_only.lower().split()
-		stops = set(stopwords.words("english"))
-		meaningful_words = [w for w in words if not w in stops]
-		return( " ".join( meaningful_words ))
-
-	def review_to_sentences(titlee,tokenizer,remove_stopwords=False):
-		raw_sentences=tokenizer.tokenize(str(titlee).strip())
-		sentences=[]
-		for raw_sentence in raw_sentences:
-			if len(raw_sentence) > 0:
-				sentences.append(wordbank(raw_sentence))
-		return sentences
+	def getCleanReviews(reviews):
+            clean_reviews=[]
+            for review in reviews:
+                clean_reviews.append( KaggleWord2VecUtility.review_to_wordlist( review))
+            return clean_reviews
 
 ###############################################################################
 
@@ -86,32 +78,35 @@ def my_form_post():
 
 	train = pd.read_csv(io.StringIO(s.decode('utf-8')),header=0)
 	num_title = train["title"].size
-	train_sentence=[]
-	train_sentence=train["title"]+train["selftext"]
-
+	train_sentence=[None]*(num_title-1)
+	for i in range(0,num_title-1):
+            if(train["selftext"][i]=="nan"):
+                train_sentence[i]=str(train["title"][i])+str(train["selftext"][i])
+            else:
+                train_sentence[i]=str(train["title"][i])
+	tokenizer = nltk.data.load('tokenizers/english.pickle')
 	sentences = []
 	for review in train_sentence:
-		sentences += review_to_sentences(review,tokenizer)
-
+		sentences += KaggleWord2VecUtility.review_to_sentences(str(review),tokenizer)
+	
 ###############################################################################
 
-	model=Word2Vec(sentences,workers=4,size=300,min_count=8,window=10,sample=1e-3)
+	model=Word2Vec(sentences,workers=4,size=30,min_count=8,seed=1,sample = 1e-3)
 	model.init_sims(replace=True)
 
-
-	trainDataVecs = getAvgFeatureVecs(wordbank(str(train_sentence)), model, 300)
-
-	#Testing
+	trainDataVecs = getAvgFeatureVecs(getCleanReviews(str(train_sentence)), model, 30)
+	trainDataVecs = Imputer().fit_transform(trainDataVecs)
+        #Testing
 	test_sentence=title+post
-	testDataVecs = getAvgFeatureVecs(wordbank(str(test_sentence)), model, 300)
-
-	forest = RandomForestClassifier(n_estimators = 100 )
-	forest = forest.fit( trainDataVecs, train["score"] )
-
-
-
-	result = forest.predict(testDataVecs)
-	output=str(result)
+	testDataVecs = getAvgFeatureVecs(getCleanReviews(str(test_sentence)), model,30)
+	testDataVecs = Imputer().fit_transform(testDataVecs)
+	forest = RandomForestRegressor()
+	forest = forest.fit(trainDataVecs, train["score"])
+####
+####
+####
+####	result = forest.predict(testDataVecs)
+	output=str(-1)
 	return output
 	
 
