@@ -23,3 +23,5 @@ For using
 * Open terminal.
 * enter `python3 *name of python script(web.py or web2.py or search.py)*` 
 * go to http://127.0.0.1:5000
+
+**For queries, contact me at [sharma_vivek@icloud.com][mailto:sharma_vivek@icloud.com]**
