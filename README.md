@@ -1,6 +1,6 @@
 # Reddit Score Predictor
 
-Basic Reddit Score Predictor made using bag of words and word2vec in python.
+Basic Reddit Score Predictor made using bag of words and word2vec in python3.
 
 Random Forests and Xgboost are used for prediction.
 
