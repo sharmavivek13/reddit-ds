@@ -3,6 +3,9 @@ Basic Reddit Score Predictor by: Vivek Sharma, (sharma_vivek@icloud.com)
 
 DataSet Used : Reddit Top 2.5 Million(https://github.com/umbrae/reddit-top-2.5-million) 
 (Reference from Kaggle Bag of Words)
+Two Models are used for prediction: Xgboost and Random Forest. By default random 
+forest is selected.
+To use xgboost uncomment lines no.76,77,78,92 and comment lines no. 81,82,91
 For More Info Refer to Readme.md
 ------------------------------------------------------------------------------'''
 
@@ -47,7 +50,7 @@ def my_form_post():
 	train = pd.read_csv(io.StringIO(s.decode('utf-8')),header=0)
 	num_title = train["title"].size
 	clean_sentences = []
-	train_sentence=[None]*(num_title-1)
+	train_sentence=[None]*(num_title)
 	for i in range(0,num_title):
 		if(train["selftext"][i]=="nan"):
 			train_sentence[i]=str(train["title"][i])+str(train["selftext"][i])
