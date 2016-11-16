@@ -10,6 +10,8 @@ The new model with more features will be updated soon.
 
 Run *web.py* for using *Bag of Words* and *web2.py* for *Word2Vec* model
 
+*search.py* takes a word and subreddit and returns all the past subreddits containing that word
+
 Dataset used :Reddit Top 2.5 Million(https://github.com/umbrae/reddit-top-2.5-million)
 
 Install the required modules of python using 
@@ -19,5 +21,5 @@ For using
 
 * Go to the directory.
 * Open terminal.
-* enter "python web.py" 
+* enter "python *name of python script* " 
 * go to http://127.0.0.1:5000
