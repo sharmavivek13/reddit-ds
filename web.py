@@ -90,7 +90,7 @@ def my_form_post():
 	test_data_feature = test_data_feature.toarray()
 	# result = xgmodel.predict(test_data_feature)
 	result = forest.predict(test_data_feature)
-	output=str(result[0])
+	output="The predicted score is:"+str(result[0])
 	return output
 
 ###############################################################################

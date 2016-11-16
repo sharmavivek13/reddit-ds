@@ -3,6 +3,9 @@ Basic Reddit Score Predictor by: Vivek Sharma, (sharma_vivek@icloud.com)
 
 DataSet Used : Reddit Top 2.5 Million(https://github.com/umbrae/reddit-top-2.5-million) 
 (Reference from Kaggle word2vec)
+Make sure you have cython installed on the system, otherwise model will take more
+time for compilation
+
 For More Info Refer to Readme.md
 ------------------------------------------------------------------------------'''
 
@@ -10,6 +13,7 @@ For More Info Refer to Readme.md
 import io
 import re
 import nltk
+import scipy
 import numpy as np
 import requests
 import pandas as pd
@@ -59,16 +63,18 @@ def my_form_post():
 
 	def getAvgFeatureVecs(reviews, model, num_features):
             counter = 0
+            num=len(reviews)
             reviewFeatureVecs = np.zeros((len(reviews),num_features),dtype="float32")
-            for review in reviews:
-                reviewFeatureVecs[counter] = makeFeatureVec(review, model,num_features)
+            for i in range(0,num):
+                reviewFeatureVecs[counter] = makeFeatureVec(reviews[i], model,num_features)
                 counter = counter + 1
             return reviewFeatureVecs
 
 	def getCleanReviews(reviews):
             clean_reviews=[]
-            for review in reviews:
-                clean_reviews.append( KaggleWord2VecUtility.review_to_wordlist( review))
+            num=len(reviews)
+            for i in range(0,num):
+                clean_reviews.append( KaggleWord2VecUtility.review_to_wordlist(reviews[i]))
             return clean_reviews
 
 ###############################################################################
@@ -78,8 +84,8 @@ def my_form_post():
 
 	train = pd.read_csv(io.StringIO(s.decode('utf-8')),header=0)
 	num_title = train["title"].size
-	train_sentence=[None]*(num_title-1)
-	for i in range(0,num_title-1):
+	train_sentence=[None]*(num_title)
+	for i in range(0,num_title):
             if(train["selftext"][i]=="nan"):
                 train_sentence[i]=str(train["title"][i])+str(train["selftext"][i])
             else:
@@ -91,22 +97,19 @@ def my_form_post():
 	
 ###############################################################################
 
-	model=Word2Vec(sentences,workers=4,size=30,min_count=8,seed=1,sample = 1e-3)
+	model=Word2Vec(sentences,workers=4,size=300,min_count=8,seed=1,sample = 1e-3)
 	model.init_sims(replace=True)
 
-	trainDataVecs = getAvgFeatureVecs(getCleanReviews(str(train_sentence)), model, 30)
+	trainDataVecs = getAvgFeatureVecs(getCleanReviews(train_sentence), model, 300)
 	trainDataVecs = Imputer().fit_transform(trainDataVecs)
         #Testing
 	test_sentence=title+post
-	testDataVecs = getAvgFeatureVecs(getCleanReviews(str(test_sentence)), model,30)
+	testDataVecs = getAvgFeatureVecs(getCleanReviews(test_sentence), model,300)
 	testDataVecs = Imputer().fit_transform(testDataVecs)
-	forest = RandomForestRegressor()
+	forest = RandomForestRegressor(n_estimators=100)
 	forest = forest.fit(trainDataVecs, train["score"])
-####
-####
-####
-####	result = forest.predict(testDataVecs)
-	output=str(-1)
+	result = forest.predict(testDataVecs)
+	output="The predicted score is:"+ str(scipy.mean(result))
 	return output
 	
 

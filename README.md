@@ -8,6 +8,8 @@ Program takes post title and text(if any) as input for specific subreddit and re
 Predicted score is not very accurate since the data is trained on post title and additional texts.
 The new model with more features will be updated soon.
 
+Run *web.py* for using * Bag of Words * and *web2.py* for *Word2Vec* model
+
 Dataset used :Reddit Top 2.5 Million(https://github.com/umbrae/reddit-top-2.5-million)
 
 Install the required modules of python using 
